@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RakTopia | Lobby Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #chatContainer {
+      background-color: #fff;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #chatMessages {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 50px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    #messageInput {
+      width: 95%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #sendMessageBtn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-left: 500px;
+    }
+
+    #logoutBtn {
+      background-color: #ff0000;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top:25px;
+      margin-left: 500px;
+    }
+
+    #logoutBtn:hover {
+      background-color: #aa0000;
+    }
+
+
+    #sendMessageBtn:hover {
+      background-color: #0056b3;
+    }
+
+    #text {
+        margin-top:100px;
+    }
+  </style>
+</head>
+<body>
+
+    <div id="text">
+    <h1>Lobby Panel</h1>
+    </div>
+
+    <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <input type="text" id="messageInput" placeholder="Schreibe eine Nachricht">
+        <button id="sendMessageBtn" onclick="sendMessage()">Senden</button>
+        <button id="logoutBtn" onclick="logout()">Abmelden</button>
+      </div>
+
+      <script>
+  function redirectToLoginIfNotLoggedIn() {
+    const isLoggedIn = localStorage.getItem('loggedIn');
+    if (!isLoggedIn) {
+      window.location.href = 'index.html';
+    }
+  }
+
+  if (performance.navigation.type === 1) {
+    window.location.href = 'index.html';
+  }
+
+  redirectToLoginIfNotLoggedIn();
+
+  function logout() {
+    localStorage.removeItem('loggedIn');
+    window.location.href = 'index.html'; 
+  }
+
+
+    const BOT_TOKEN = 'OTQxMjU1MTQzODkzMTE4OTg3.GAIwx2.xoGhNG_mpBofBu3lAf-eyALgpi-tEtWE7E8cH0';
+    const GATEWAY_URL = 'wss://gateway.discord.gg/?v=9&encoding=json';
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1153035132370944000/Rd5lX9a8x6l9iFo0A282It94gpwVo1JDs4bBcot5ZpwEXC6H0xdUR3UpA6kJRmGvaltn';
+
+    const websocket = new WebSocket(GATEWAY_URL);
+
+    websocket.addEventListener('open', (event) => {
+      console.log('WebSocket connected to Discord API');
+      const identifyPayload = {
+        op: 2,
+        d: {
+          token: BOT_TOKEN,
+          intents: 513,  
+          properties: {
+            $os: 'linux',
+            $browser: 'chrome',
+            $device: 'myDevice'
+          }
+        }
+      };
+      websocket.send(JSON.stringify(identifyPayload));
+    });
+
+    websocket.addEventListener('message', (event) => {
+      const eventData = JSON.parse(event.data);
+
+      if (eventData.op === 0 && eventData.t === 'MESSAGE_CREATE') {
+        const messageContent = eventData.d.content;
+        appendMessageToChat('INGAME: ' + messageContent);
+      }
+    });
+
+    function appendMessageToChat(message) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      chatMessages.appendChild(messageElement);
+    }
+
+    async function sendMessageToDiscord(message) {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: message }),
+      });
+
+      if (response.ok) {
+        appendMessageToChat('Du: ' + message);
+      } else {
+        console.error('Fehler beim Senden der Nachricht an Discord:', response.statusText);
+      }
+    }
+
+    function sendMessage() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+
+      if (message !== '') {
+        sendMessageToDiscord(message);
+        messageInput.value = ''; 
+      }
+    }
+  </script>
+
+</body>
+</html>
