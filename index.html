@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RakTopia | Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #loginContainer {
+      background-color: #fff;
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 95%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+    
+    <div id="loginContainer">
+        <h2>Login</h2>
+        <input type="text" id="usernameInput" placeholder="Benutzername">
+        <input type="password" id="passwordInput" placeholder="Passwort">
+        <button id="loginBtn" onclick="login()">Anmelden</button>
+      </div>
+    
+      <script>
+
+let obj; // Declare obj variable outside of fetch callback
+
+fetch('./supa.json')
+  .then(response => response.json())
+  .then(data => {
+    obj = data; // Assign data to obj variable
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+
+function login() {
+  const username = document.getElementById('usernameInput').value.trim();
+  const password = document.getElementById('passwordInput').value.trim();
+
+  if (checkCredentials(username, password)) {
+    localStorage.setItem('loggedIn', 'true');
+    window.location.href = 'chat.html';  
+  } else {
+    alert('Ungültige Anmeldeinformationen.');
+  }
+}
+
+function checkCredentials(username, password) {
+  return username === obj.Benutzername && password === obj.Passwort;
+}
+
+      </script>
+
+    </body>
+    </html>
